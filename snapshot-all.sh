@@ -1,11 +1,14 @@
 #!/bin/bash -x
 
-. cluster.conf
+KVM_DOMAINS=$(cat ./kvm-domains)
 
-#SNAPSHOT="sudo"
-SNAPSHOT="prefab"
+if [ -z "$1" ]
+then
+	echo Usage: $0 SNAPSHOT
+	exit 1
+fi
 
-for k8sdom in $(cat ${KVM_DOMAINS}); do
+for k8sdom in ${KVM_DOMAINS}; do
 	virsh snapshot-create-as \
 		--domain $k8sdom \
 		--name $SNAPSHOT

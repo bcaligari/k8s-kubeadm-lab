@@ -2,7 +2,7 @@
 
 These are scripts I put together to stand up a small k8s lab cluster the
 `kubadm` way.  This repository is my backup.  Those scripts were not written
-for public consumption.
+for public consumption and are specific to my lab environment.
 
 ## Target
 
@@ -42,11 +42,14 @@ for public consumption.
 * Install `kubeadm`, `kubelet`, and `kubectl` on all nodes.
   * `ansible-playbook -i inventory.yaml playbook-kubexxx.yaml`
 * Initialise the first admin node - run once.
-  * `ansible-playbook -i inventory.yaml playbook-init-control-plane`
+  * `ansible-playbook -i inventory.yaml playbook-init-controlplane.yaml`
+* Initialise Calico on first admin node - run once.
+  * `ansible-playbook -i inventory.yaml playbook-deploy-cni.yaml`
 * TODO - automate provisioning of rest of the nodes
 
 ## To Automate
 
-* Track changes to default `containerd` config.
+* Track changes to Containerd default config.
+* Track changes to Calico `custom-resources.yaml`.
 * Track updates to repo GPG keys
 

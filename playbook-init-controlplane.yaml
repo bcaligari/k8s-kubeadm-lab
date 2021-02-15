@@ -1,7 +1,7 @@
 # https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file
 ---
 - name: 'Init control plane on first master'
-  hosts: first_masters
+  hosts: first
   become: true
 
   tasks:

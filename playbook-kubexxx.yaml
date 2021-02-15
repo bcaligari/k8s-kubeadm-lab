@@ -68,15 +68,15 @@
             name: '{{ item }}'
             state: latest
           loop:
+            - 'kubectl'
             - 'kubelet'
             - 'kubeadm'
-            - 'kubectl'
 
         - name: hold kubexxx versions
           dpkg_selections:
             name: '{{ item }}'
             selection: hold
           loop:
+            - 'kubectl'
             - 'kubelet'
             - 'kubeadm'
-            - 'kubectl'
