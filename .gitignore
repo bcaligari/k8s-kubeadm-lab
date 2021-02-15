@@ -1,0 +1,4 @@
+.vscode/
+admin.conf
+kubeadm-init.log
+orig/
