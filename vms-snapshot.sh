@@ -8,6 +8,8 @@ then
 	exit 1
 fi
 
+SNAPSHOT="$1"
+
 for k8sdom in ${KVM_DOMAINS}; do
 	virsh snapshot-create-as \
 		--domain $k8sdom \

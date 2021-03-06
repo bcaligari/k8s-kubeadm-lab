@@ -27,29 +27,26 @@ for public consumption and are specific to my lab environment.
 ## Support files and scripts
 
 * `./kvm-domains` - list of KVM domains for this project
-* `./start-all.sh` - start all KVM domains
-* `./revert-all.sh` - revert to snapshot passed as only parameter
+* `./vms-start.sh` - start all KVM domains
+* `./vms-revert-snapshot.sh` - revert to snapshot passed as only parameter
 * `./inventory.yaml` - Ansible inventory of all VMs
 * `./stop-all.sh` - shutdown all the VMs in Ansible inventory
 
 ## Installation workflow
 
 * Freshly installed VMs with `sysop` user with full `sudo` access.
+  * kvm snapshot `sudo`
 * Clean up and provision VMs.
   * `ansible-playbook -i inventory.yaml playbook-provision-vm.yaml`
-* Install `containerd` on all nodes.
-  * `ansible-playbook -i inventory.yaml playbook-containerd.yaml`
-* Install `kubeadm`, `kubelet`, and `kubectl` on all nodes.
-  * `ansible-playbook -i inventory.yaml playbook-kubexxx.yaml`
-* Initialise the first admin node - run once.
+* Install `containerd`, `kubeadm`, `kubelet`, and `kubectl` on all nodes.
+  * `ansible-playbook -i inventory.yaml playbook-k8s-addons.yaml`
+* Initialise the first admin node and deploy Calico as CNI.
   * `ansible-playbook -i inventory.yaml playbook-init-controlplane.yaml`
-* Initialise Calico on first admin node - run once.
-  * `ansible-playbook -i inventory.yaml playbook-deploy-cni.yaml`
-* TODO - automate provisioning of rest of the nodes
+* Join remaining control nodes and worker nodes.
+  * `ansible-playbook -i inventory.yaml playbook-join-nodes.yaml`
 
 ## To Automate
 
 * Track changes to Containerd default config.
 * Track changes to Calico `custom-resources.yaml`.
 * Track updates to repo GPG keys
-

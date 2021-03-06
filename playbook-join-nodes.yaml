@@ -1,0 +1,88 @@
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/
+# https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-token/
+---
+- name: 'Get join instructions'
+  hosts: master0
+
+  tasks:
+    - name: create a certificates key
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - certs
+          - certificate-key
+      register: certificate_key
+      become: true
+
+    - name: upload certs
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - init
+          - phase
+          - upload-certs
+          - --upload-certs
+          - --certificate-key
+          - "{{ certificate_key.stdout }}"
+      register: kubeadm_init_certs
+      become: true
+
+    - name: create token for control node
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - token
+          - create
+          - --print-join-command
+          - --certificate-key
+          - "{{ certificate_key.stdout }}"
+      register: control_join_command
+      become: true
+    
+    - name: create token for worker node
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - token
+          - create
+          - --print-join-command
+      register: worker_join_command
+      become: true
+    
+    - name: save certificate key
+      ansible.builtin.copy:
+        content: "{{ certificate_key.stdout }}"
+        dest: ./cluster/certificate-key
+      delegate_to: 127.0.0.1
+
+    - name: save control plain join command
+      ansible.builtin.copy:
+        content: "{{ control_join_command.stdout }}"
+        dest: ./cluster/kubeadm-join-control
+      delegate_to: 127.0.0.1
+    
+    - name: save worker plain join command
+      ansible.builtin.copy:
+        content: "{{ worker_join_command.stdout }}"
+        dest: ./cluster/kubeadm-join-worker
+      delegate_to: 127.0.0.1
+    
+- name: 'Join control nodes'
+  hosts: next_masters
+
+  tasks:
+    - name: join control node
+      command:
+        cmd: "{{ lookup('file', './cluster/kubeadm-join-control') }}"
+        creates: /etc/kubernetes/pki
+      become: true
+
+- name: 'Join worker nodes'
+  hosts: workers
+
+  tasks:
+    - name: join worker node
+      command:
+        cmd: "{{ lookup('file', './cluster/kubeadm-join-worker') }}"
+        creates: /etc/kubernetes/pki
+      become: true

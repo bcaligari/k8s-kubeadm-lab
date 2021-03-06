@@ -41,10 +41,7 @@ workers:
     worker0:
     worker1:
     worker2:
-first:
-  hosts:
-    master0:
-extra_masters:
+next_masters:
   hosts:
     master1:
     master2:

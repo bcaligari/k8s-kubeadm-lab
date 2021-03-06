@@ -1,35 +1,73 @@
 # https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file
+# https://docs.projectcalico.org/getting-started/kubernetes/quickstart
 ---
 - name: 'Init control plane on first master'
-  hosts: first
-  become: true
+  hosts: master0
 
   tasks:
-    - name: kubadm init first master node
-      block:
-        - name: copy cluster configuration manifest
-          ansible.builtin.copy:
-            src: ./files/kubeadm-init-config.yaml
-            dest: /root/cluster-init.yaml
-            owner: root
-            group: root
-            mode: '0644'
+    - name: copy cluster configuration manifest
+      ansible.builtin.copy:
+        src: ./files/kubeadm-init-config.yaml
+        dest: /root/cluster-init.yaml
+        owner: root
+        group: root
+        mode: '0644'
+      become: true
 
-        - name: kubadm init the cluster
-          ansible.builtin.shell:
-            cmd: "/usr/bin/kubeadm init --config=./cluster-init.yaml --v=5 | tee kubeadm-init.log"
-            chdir: "/root"
+    - name: kubadm init the cluster
+      ansible.builtin.command:
+        argv:
+          - kubeadm
+          - init
+          - --config=./cluster-init.yaml
+          - --upload-certs
+          - --v=5
+        chdir: "/root"
+      register: kubeadm_init
+      become: true
           
-    - name: get kubeadm init details locally
-      block:
-        - name: get kubeconfig
-          ansible.builtin.fetch:
-            src: /etc/kubernetes/admin.conf
-            dest: ./files/
-            flat: yes
+    - name: get kubeconfig
+      ansible.builtin.fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: ./cluster/
+        flat: yes
+      become: true
 
-        - name: get kubeadm init logs
-          ansible.builtin.fetch:
-            src: /root/kubeadm-init.log
-            dest: ./files/
-            flat: yes
+    - name: get kubeadm init logs
+      ansible.builtin.copy:
+        content: "{{ kubeadm_init.stdout }}"
+        dest: ./cluster/kubeadm-init.log
+      delegate_to: 127.0.0.1
+
+    - name: copy Calico custom resources
+      ansible.builtin.copy:
+        src: ./files/calico-custom-resources.yaml
+        dest: /root/calico-custom-resources.yaml
+        owner: root
+        group: root
+        mode: '0644'
+      become: true
+
+    - name: create the Tigera Calico operator and CRDs
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - create
+          - -f
+          - https://docs.projectcalico.org/manifests/tigera-operator.yaml
+        chdir: "/root"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      become: true
+
+    - name: install Calico
+      ansible.builtin.command:
+        argv:
+          - kubectl
+          - create
+          - -f
+          - ./calico-custom-resources.yaml
+        chdir: "/root"
+      environment:
+        KUBECONFIG: /etc/kubernetes/admin.conf
+      become: true
