@@ -1,8 +1,8 @@
 # 6 node kubernetes cluster
 
-These are scripts I put together to stand up a small k8s lab cluster the
-`kubadm` way.  This repository is my backup.  Those scripts were not written
-for public consumption and are specific to my lab environment.
+Half baked automation to stand up a small k8s lab cluster the `kubadm` way.
+These scripts were written to meet my specific needs within my home lab
+environment and not intended for public consumption.
 
 ## Target
 
