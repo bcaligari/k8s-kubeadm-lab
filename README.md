@@ -45,8 +45,14 @@ for public consumption and are specific to my lab environment.
 * Join remaining control nodes and worker nodes.
   * `ansible-playbook -i inventory.yaml playbook-join-nodes.yaml`
 
-## To Automate
+## TODO
 
 * Track changes to Containerd default config.
 * Track changes to Calico `custom-resources.yaml`.
 * Track updates to repo GPG keys
+* Put an LB in front of control plane
+
+## Reminders
+
+* To use the cluser make sure the right `kubectl` is in `~/bin` and
+  `KUBECONFIG` set to `./cluser/admin.conf`.

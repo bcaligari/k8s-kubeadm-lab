@@ -72,7 +72,7 @@
 
   tasks:
     - name: join control node
-      command:
+      ansible.builtin.command:
         cmd: "{{ lookup('file', './cluster/kubeadm-join-control') }}"
         creates: /etc/kubernetes/pki
       become: true
@@ -82,7 +82,7 @@
 
   tasks:
     - name: join worker node
-      command:
+      ansible.builtin.command:
         cmd: "{{ lookup('file', './cluster/kubeadm-join-worker') }}"
         creates: /etc/kubernetes/pki
       become: true
